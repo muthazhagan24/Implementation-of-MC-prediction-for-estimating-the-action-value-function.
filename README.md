@@ -57,7 +57,72 @@ Monte Carlo methods estimate action values by averaging returns obtained after v
 
 ## Program
 
-```python
+```
+import numpy as np
+from collections import defaultdict
+import gym
+
+env = gym.make("FrozenLake-v1", is_slippery=False)
+
+gamma = 0.9
+episodes = 5000
+
+Q = defaultdict(float)
+
+returns = defaultdict(list)
+
+def policy(state):
+    return env.action_space.sample()
+
+def generate_episode():
+
+    episode = []
+
+    state, _ = env.reset()
+
+    done = False
+
+    while not done:
+
+        action = policy(state)
+
+        next_state, reward, terminated, truncated, _ = env.step(action)
+
+        done = terminated or truncated
+
+        episode.append((state, action, reward))
+
+        state = next_state
+
+    return episode
+
+for ep in range(episodes):
+
+    episode = generate_episode()
+
+    G = 0
+
+    visited_pairs = set()
+
+    for t in reversed(range(len(episode))):
+
+        state, action, reward = episode[t]
+
+        G = gamma * G + reward
+
+        # First-visit MC
+        if (state, action) not in visited_pairs:
+
+            returns[(state, action)].append(G)
+
+            Q[(state, action)] = np.mean(returns[(state, action)])
+
+            visited_pairs.add((state, action))
+
+print("\nAction Value Function:\n")
+
+for key in Q:
+    print(f"State-Action {key}: {Q[key]:.3f}")
 
 ```
 
@@ -65,10 +130,14 @@ Monte Carlo methods estimate action values by averaging returns obtained after v
 
 ## Output
 
-```text
+
+<img width="409" height="708" alt="image" src="https://github.com/user-attachments/assets/9214cad7-3275-4021-898d-0a3aad9eb2bb" />
+
+/n
+
+<img width="315" height="312" alt="image" src="https://github.com/user-attachments/assets/c31d0f9a-14cf-492c-81b7-768b64a2b310" />
 
 
-```
 
 ---
 
